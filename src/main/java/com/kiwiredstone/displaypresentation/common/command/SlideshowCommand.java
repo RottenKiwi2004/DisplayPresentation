@@ -21,6 +21,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
+import java.util.OptionalDouble;
 
 /**
  * The {@code /slideshow} command tree, built with vanilla Brigadier so it carries no loader-specific
@@ -51,10 +52,14 @@ public final class SlideshowCommand {
                         .then(Commands.argument("name", StringArgumentType.word())
                                 .suggests(SUGGEST_DEFINITIONS)
                                 .executes(SlideshowCommand::placeFacingPlayer)
+                                .then(Commands.argument("scale", FloatArgumentType.floatArg(0.0f))
+                                        .executes(SlideshowCommand::placeFacingPlayerScaled))
                                 .then(Commands.argument("pos", Vec3Argument.vec3())
                                         .then(Commands.argument("yaw", FloatArgumentType.floatArg())
                                                 .then(Commands.argument("pitch", FloatArgumentType.floatArg())
-                                                        .executes(SlideshowCommand::placeExplicit))))))
+                                                        .executes(SlideshowCommand::placeExplicit)
+                                                        .then(Commands.argument("scale", FloatArgumentType.floatArg(0.0f))
+                                                                .executes(SlideshowCommand::placeExplicitScaled)))))))
                 .then(Commands.literal("stop")
                         .then(Commands.argument("name", StringArgumentType.word())
                                 .suggests(SUGGEST_ACTIVE)
@@ -77,6 +82,14 @@ public final class SlideshowCommand {
     }
 
     private static int placeFacingPlayer(CommandContext<CommandSourceStack> ctx) {
+        return placeFacingPlayer(ctx, OptionalDouble.empty());
+    }
+
+    private static int placeFacingPlayerScaled(CommandContext<CommandSourceStack> ctx) {
+        return placeFacingPlayer(ctx, OptionalDouble.of(FloatArgumentType.getFloat(ctx, "scale")));
+    }
+
+    private static int placeFacingPlayer(CommandContext<CommandSourceStack> ctx, OptionalDouble scale) {
         CommandSourceStack source = ctx.getSource();
         String name = StringArgumentType.getString(ctx, "name");
 
@@ -98,22 +111,32 @@ public final class SlideshowCommand {
             pitch = 0.0f;
         }
 
-        return doPlace(source, name, center, yaw, pitch);
+        return doPlace(source, name, center, yaw, pitch, scale);
     }
 
     private static int placeExplicit(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        return placeExplicit(ctx, OptionalDouble.empty());
+    }
+
+    private static int placeExplicitScaled(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        return placeExplicit(ctx, OptionalDouble.of(FloatArgumentType.getFloat(ctx, "scale")));
+    }
+
+    private static int placeExplicit(CommandContext<CommandSourceStack> ctx, OptionalDouble scale)
+            throws CommandSyntaxException {
         CommandSourceStack source = ctx.getSource();
         String name = StringArgumentType.getString(ctx, "name");
         Vec3 center = Vec3Argument.getVec3(ctx, "pos");
         float yaw = FloatArgumentType.getFloat(ctx, "yaw");
         float pitch = FloatArgumentType.getFloat(ctx, "pitch");
-        return doPlace(source, name, center, yaw, pitch);
+        return doPlace(source, name, center, yaw, pitch, scale);
     }
 
-    private static int doPlace(CommandSourceStack source, String name, Vec3 center, float yaw, float pitch) {
+    private static int doPlace(CommandSourceStack source, String name, Vec3 center, float yaw, float pitch,
+                               OptionalDouble scale) {
         MinecraftServer server = source.getServer();
         ServerLevel level = source.getLevel();
-        boolean ok = PresentationManager.get().place(server, level, name, center, yaw, pitch);
+        boolean ok = PresentationManager.get().place(server, level, name, center, yaw, pitch, scale);
         if (!ok) {
             source.sendFailure(Component.literal("No slideshow '" + name + "' found in /slideshows"));
             return 0;

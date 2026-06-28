@@ -46,6 +46,13 @@ public final class SlideProgress {
     /** Centre/orientation of the presentation; per-slide aspect ratios are applied on top of this. */
     private final SlideFrame baseFrame;
 
+    /**
+     * Uniform multiplier applied to every slide's aspect half-extents. It converts the authored
+     * aspect ratio into an absolute world size: with the default placement, the slideshow's default
+     * full width equals the {@code scale} blocks requested at {@code /slideshow place}.
+     */
+    private final double scaleFactor;
+
     private final Map<String, BaseElement> live = new LinkedHashMap<>();
     private BaseSlide currentSlide;
     private int slideIndex = -1;
@@ -54,11 +61,12 @@ public final class SlideProgress {
 
     private int ticksSinceStep = 0;
 
-    public SlideProgress(ServerLevel level, SlideshowDefinition show, SlideFrame baseFrame) {
+    public SlideProgress(ServerLevel level, SlideshowDefinition show, SlideFrame baseFrame, double scaleFactor) {
         this.level = level;
         this.show = show;
         this.showName = show.name;
         this.baseFrame = baseFrame;
+        this.scaleFactor = scaleFactor;
     }
 
     public ServerLevel level() {
@@ -98,7 +106,9 @@ public final class SlideProgress {
 
     private SlideFrame frameForSlide(SlideDefinition slide) {
         Aspect aspect = show.aspectFor(slide);
-        return baseFrame.withAspect(aspect.w, aspect.h);
+        return baseFrame.withAspect(
+                (float) (aspect.w * scaleFactor),
+                (float) (aspect.h * scaleFactor));
     }
 
     /** Begins the presentation at the first slide. */
@@ -126,7 +136,7 @@ public final class SlideProgress {
         ticksSinceStep = 0;
         SlideDefinition slideDef = show.slides.get(index);
         currentSlide = new BaseSlide(level, showName, frameForSlide(slideDef), slideDef,
-                show.backgroundFor(slideDef));
+                show.backgroundFor(slideDef), scaleFactor);
         for (BaseElement element : currentSlide.elements()) {
             element.spawn();
             live.put(element.id(), element);
@@ -182,7 +192,7 @@ public final class SlideProgress {
     private void transitionToNextSlide() {
         SlideDefinition nextDef = show.slides.get(slideIndex + 1);
         BaseSlide next = new BaseSlide(level, showName, frameForSlide(nextDef), nextDef,
-                show.backgroundFor(nextDef));
+                show.backgroundFor(nextDef), scaleFactor);
 
         Map<String, BaseElement> nextLive = new LinkedHashMap<>();
         for (BaseElement nextElement : next.elements()) {

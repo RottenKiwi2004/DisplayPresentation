@@ -20,6 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.UUID;
 
 /**
@@ -55,10 +56,13 @@ public final class PresentationManager {
 
     /**
      * Loads the named slideshow definition and starts presenting it centred at {@code center} facing
-     * {@code (yaw, pitch)}. Returns {@code false} if no such definition exists on disk.
+     * {@code (yaw, pitch)}. When {@code scaleWidth} is present it sets the slideshow's absolute width
+     * in blocks (so {@code 1} means the default slide is one block wide); otherwise the authored
+     * aspect values are used directly as block half-extents. Returns {@code false} if no such
+     * definition exists on disk.
      */
     public boolean place(MinecraftServer server, ServerLevel level, String name,
-                         Vec3 center, float yaw, float pitch) {
+                         Vec3 center, float yaw, float pitch, OptionalDouble scaleWidth) {
         Optional<SlideshowDefinition> loaded = SlideshowRepository.load(name);
         if (loaded.isEmpty()) {
             return false;
@@ -70,8 +74,16 @@ public final class PresentationManager {
             stop(server, name);
         }
 
-        SlideFrame baseFrame = new SlideFrame(center, yaw, pitch, def.aspect.w, def.aspect.h);
-        SlideProgress progress = new SlideProgress(level, def, baseFrame);
+        // Convert the requested absolute width into a uniform factor on the aspect half-extents:
+        // full width = 2 * aspect.w, and we want it to equal scaleWidth blocks.
+        double scaleFactor = 1.0;
+        if (scaleWidth.isPresent() && scaleWidth.getAsDouble() > 0.0 && def.aspect.w > 0.0f) {
+            scaleFactor = scaleWidth.getAsDouble() / (2.0 * def.aspect.w);
+        }
+
+        SlideFrame baseFrame = new SlideFrame(center, yaw, pitch,
+                (float) (def.aspect.w * scaleFactor), (float) (def.aspect.h * scaleFactor));
+        SlideProgress progress = new SlideProgress(level, def, baseFrame, scaleFactor);
         progress.start();
         active.put(name, progress);
 

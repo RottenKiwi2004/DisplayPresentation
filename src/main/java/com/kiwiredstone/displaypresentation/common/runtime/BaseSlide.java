@@ -35,19 +35,22 @@ public final class BaseSlide {
     private int depthCounter;
 
     public BaseSlide(ServerLevel level, String showName, SlideFrame frame, SlideDefinition def,
-                     SlideBackground background) {
+                     SlideBackground background, double scaleFactor) {
         this.level = level;
         this.showName = showName;
         this.frame = frame;
         this.def = def;
         // The background is the first (back-most) element so it morphs/cleans up like any other.
+        // It sizes itself from the (already scaled) frame, so it needs no extra scale factor.
         if (background != null && background.enabled) {
             BackgroundElement bg = new BackgroundElement(
                     level, showName, new BackgroundElementDefinition(background.toArgb()), frame);
             elements.add(bg);
             elementsById.put(bg.id(), bg);
         }
-        build(def.elements, ParentTransform.IDENTITY, "");
+        // Root transform carries the slideshow scale, so every element's anchor position, alignment
+        // offset and visual scale are multiplied by it (and it composes through nested groups).
+        build(def.elements, new ParentTransform(0.0, 0.0, 0.0, scaleFactor), "");
     }
 
     private void build(List<ElementDefinition> defs, ParentTransform parent, String prefix) {

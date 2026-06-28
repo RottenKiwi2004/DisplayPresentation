@@ -47,9 +47,17 @@ public final class DisplayEntities {
     }
 
     public static Display.TextDisplay spawnText(ServerLevel level, SlideFrame frame, String showName, String elementId) {
+        return spawnTextAt(level, frame, frame.center(), showName, elementId);
+    }
+
+    /**
+     * Spawns a text display oriented to the frame but at an explicit world position. Used by the
+     * background, which sits slightly behind the slide centre along the plane normal.
+     */
+    public static Display.TextDisplay spawnTextAt(ServerLevel level, SlideFrame frame, Vec3 pos,
+                                                  String showName, String elementId) {
         Display.TextDisplay entity = new Display.TextDisplay(EntityType.TEXT_DISPLAY, level);
-        Vec3 c = frame.center();
-        entity.setPos(c.x, c.y, c.z);
+        entity.setPos(pos.x, pos.y, pos.z);
         entity.setYRot(frame.yaw());
         entity.setXRot(frame.pitch());
         entity.setNoGravity(true);

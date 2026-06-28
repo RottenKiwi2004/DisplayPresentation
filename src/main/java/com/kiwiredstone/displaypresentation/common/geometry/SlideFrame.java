@@ -62,6 +62,19 @@ public record SlideFrame(Vec3 center, float yaw, float pitch, float w, float h) 
         return orientation().transform(new Vector3f(0.0f, 0.0f, 1.0f));
     }
 
+    /**
+     * Returns the centre shifted by {@code distance} along the slide normal (perpendicular to the
+     * plane, derived from yaw/pitch). Positive {@code distance} moves toward the front face; negative
+     * moves behind it. Used to push the background a hair behind the content to avoid z-fighting.
+     */
+    public Vec3 alongNormal(double distance) {
+        Vector3f n = normal();
+        return new Vec3(
+                center.x + n.x * distance,
+                center.y + n.y * distance,
+                center.z + n.z * distance);
+    }
+
     /** Converts a slide-local coordinate to a world position. */
     public Vec3 toWorld(double x, double y) {
         Vector3f r = right();

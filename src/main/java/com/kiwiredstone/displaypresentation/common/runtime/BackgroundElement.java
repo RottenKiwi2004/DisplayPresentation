@@ -5,6 +5,7 @@ import com.kiwiredstone.displaypresentation.common.render.DisplayEntities;
 import com.kiwiredstone.displaypresentation.common.render.ElementTransform;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Display;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * Runtime slide background: a text-display entity whose translucent background quad is stretched to
@@ -18,11 +19,16 @@ import net.minecraft.world.entity.Display;
 public final class BackgroundElement extends BaseElement {
     public static final String ID = "__bg__";
 
-    /** Depth (along the slide normal) placing the background just behind the content layer. */
-    public static final double DEPTH = -0.01;
+    /**
+     * Distance (in blocks) the background is pushed behind the slide centre, along the plane normal
+     * derived from yaw/pitch, so the base canvas never z-fights with the elements drawn on it.
+     */
+    public static final double OFFSET = 0.01;
 
     public BackgroundElement(ServerLevel level, String showName, BackgroundElementDefinition def, SlideFrame frame) {
-        super(level, showName, ID, def, frame, ParentTransform.IDENTITY, DEPTH);
+        // Depth (transform-Z) is 0; the backward offset is applied to the entity position instead,
+        // so the separation is a true perpendicular shift rather than an in-transform nudge.
+        super(level, showName, ID, def, frame, ParentTransform.IDENTITY, 0.0);
     }
 
     private int argb() {
@@ -31,7 +37,9 @@ public final class BackgroundElement extends BaseElement {
 
     @Override
     public void spawn() {
-        this.entity = DisplayEntities.spawnText(level, frame, showName, ID);
+        // Sit a hair behind the slide plane along its normal (perpendicular axis from yaw/pitch).
+        Vec3 behind = frame.alongNormal(-OFFSET);
+        this.entity = DisplayEntities.spawnTextAt(level, frame, behind, showName, ID);
         applyStep(0, false);
     }
 
