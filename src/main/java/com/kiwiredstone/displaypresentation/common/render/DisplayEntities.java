@@ -92,13 +92,13 @@ public final class DisplayEntities {
     }
 
     /**
-     * Configures a text display as a solid translucent rectangle: a single (invisible) space whose
-     * background quad is stretched by the transform to fill the frame, coloured by {@code argb}.
-     * {@code cullSize} enlarges the culling box so the stretched quad is not culled when the anchor
-     * block leaves the screen.
+     * Configures a text display as a solid filled rectangle: a single (invisible) space whose
+     * background quad is stretched (and rotated) by the transform, coloured by {@code argb}. Used both
+     * for the slide background and for line elements. {@code cullSize} enlarges the culling box so the
+     * stretched quad is not culled when the anchor block leaves the screen.
      */
-    public static void applyBackgroundRect(Display.TextDisplay entity, int argb, double cullSize,
-                                           ElementTransform transform, int interpolationTicks) {
+    public static void applyFilledRect(Display.TextDisplay entity, int argb, double cullSize,
+                                       ElementTransform transform, int interpolationTicks) {
         Transformation transformation = transform.toTransformation();
         EntityNbt.edit(entity, out -> {
             out.store(Display.TAG_TRANSFORMATION, Transformation.EXTENDED_CODEC, transformation);

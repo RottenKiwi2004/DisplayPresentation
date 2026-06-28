@@ -100,8 +100,10 @@ public final class SlideshowCommand {
 
         Entity entity = source.getEntity();
         if (entity != null) {
+            // Start from eye level rather than the feet so the slide is placed where the player looks.
+            Vec3 eye = base.add(0.0, entity.getEyeHeight(), 0.0);
             Vec3 look = entity.getLookAngle();
-            center = base.add(look.scale(PLACE_DISTANCE));
+            center = eye.add(look.scale(PLACE_DISTANCE));
             // Face the player: the slide normal points back toward them.
             yaw = Mth.wrapDegrees(entity.getYRot() + 180.0f);
             pitch = -entity.getXRot();

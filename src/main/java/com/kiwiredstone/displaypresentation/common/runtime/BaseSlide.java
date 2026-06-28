@@ -3,6 +3,7 @@ package com.kiwiredstone.displaypresentation.common.runtime;
 import com.kiwiredstone.displaypresentation.common.geometry.SlideFrame;
 import com.kiwiredstone.displaypresentation.common.model.ElementDefinition;
 import com.kiwiredstone.displaypresentation.common.model.GroupElementDefinition;
+import com.kiwiredstone.displaypresentation.common.model.LineElementDefinition;
 import com.kiwiredstone.displaypresentation.common.model.SlideBackground;
 import com.kiwiredstone.displaypresentation.common.model.SlideDefinition;
 import com.kiwiredstone.displaypresentation.common.model.TextElementDefinition;
@@ -64,6 +65,11 @@ public final class BaseSlide {
             } else if (d instanceof TextElementDefinition text) {
                 double depth = depthCounter++ * DEPTH_STEP;
                 TextElement element = new TextElement(level, showName, pathId, text, frame, parent, depth);
+                elements.add(element);
+                elementsById.put(pathId, element);
+            } else if (d instanceof LineElementDefinition line) {
+                double depth = depthCounter++ * DEPTH_STEP;
+                LineElement element = new LineElement(level, showName, pathId, line, frame, parent, depth);
                 elements.add(element);
                 elementsById.put(pathId, element);
             }

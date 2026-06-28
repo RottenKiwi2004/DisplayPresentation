@@ -7,6 +7,7 @@ package com.kiwiredstone.displaypresentation.common.model;
  */
 public enum ElementType {
     TEXT,
+    LINE,
     GROUP;
 
     public static ElementType fromString(String value) {

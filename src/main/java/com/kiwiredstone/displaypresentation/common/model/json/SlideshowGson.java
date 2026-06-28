@@ -12,6 +12,7 @@ import com.google.gson.JsonSerializer;
 import com.kiwiredstone.displaypresentation.common.model.ElementDefinition;
 import com.kiwiredstone.displaypresentation.common.model.ElementType;
 import com.kiwiredstone.displaypresentation.common.model.GroupElementDefinition;
+import com.kiwiredstone.displaypresentation.common.model.LineElementDefinition;
 import com.kiwiredstone.displaypresentation.common.model.TextElementDefinition;
 
 import java.lang.reflect.Type;
@@ -51,6 +52,7 @@ public final class SlideshowGson {
             ElementType kind = ElementType.fromString(typeName);
             return switch (kind) {
                 case GROUP -> ctx.deserialize(obj, GroupElementDefinition.class);
+                case LINE -> ctx.deserialize(obj, LineElementDefinition.class);
                 case TEXT -> ctx.deserialize(obj, TextElementDefinition.class);
             };
         }

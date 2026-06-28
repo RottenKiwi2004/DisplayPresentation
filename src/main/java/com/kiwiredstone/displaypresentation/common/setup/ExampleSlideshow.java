@@ -5,6 +5,7 @@ import com.kiwiredstone.displaypresentation.common.geometry.Alignment;
 import com.kiwiredstone.displaypresentation.common.model.AnimationDefinition;
 import com.kiwiredstone.displaypresentation.common.model.Aspect;
 import com.kiwiredstone.displaypresentation.common.model.GroupElementDefinition;
+import com.kiwiredstone.displaypresentation.common.model.LineElementDefinition;
 import com.kiwiredstone.displaypresentation.common.model.SlideBackground;
 import com.kiwiredstone.displaypresentation.common.model.SlideDefinition;
 import com.kiwiredstone.displaypresentation.common.model.SlideshowDefinition;
@@ -59,8 +60,17 @@ public final class ExampleSlideshow {
         slideUp.durationTicks = 10;
         subtitle.animations.add(slideUp);
 
+        // A gold divider line drawn from point A to point B, just under the title.
+        LineElementDefinition divider = new LineElementDefinition();
+        divider.id = "divider";
+        divider.pointA = new Vec2(-1.0, 0.35);
+        divider.pointB = new Vec2(1.0, 0.35);
+        divider.lineWidth = 0.03;
+        divider.color = "#FFD700";
+
         slide1.elements.add(title);
         slide1.elements.add(subtitle);
+        slide1.elements.add(divider);
 
         // --- Slide 2 ---
         SlideDefinition slide2 = new SlideDefinition();

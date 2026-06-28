@@ -66,7 +66,7 @@ public final class BackgroundElement extends BaseElement {
             return;
         }
         double cullSize = Math.max(frame.w(), frame.h()) * 2.5;
-        DisplayEntities.applyBackgroundRect(
+        DisplayEntities.applyFilledRect(
                 (Display.TextDisplay) entity, argb(), cullSize, transform, interpolationTicks);
     }
 }
