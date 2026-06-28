@@ -28,6 +28,21 @@ public final class DisplayEntities {
     /** Per-element scoreboard tag prefix, lets us match a single element across reloads. */
     public static final String ELEMENT_TAG_PREFIX = "dp_el.";
 
+    // --- Text-display background geometry, derived from the vanilla text renderer ---
+    // The renderer scales text by 0.025 blocks/px and draws the background quad over px
+    // x in [-1, m] and y in [-1, n], where m = max line width and n = lines * 10 - 1.
+    // For a single space (m = 4px, one line => n = 9) at transformation-scale 1 the quad is:
+    //   width  = 0.025 * (m + 1) = 0.125 blocks,   height = 0.025 * (n + 1) = 0.25 blocks
+    //   centre = (0.0125, 0.125) blocks from the transform translation (anchor is horizontally
+    //   near-centre and sits at the bottom of the text block).
+    // We use these to stretch a single-space background into a rectangle that exactly fills a frame.
+    public static final double TEXT_SCALE = 0.025;
+    private static final int BG_SPACE_WIDTH_PX = 4;
+    public static final double BG_WIDTH_AT_SCALE1 = TEXT_SCALE * (BG_SPACE_WIDTH_PX + 1);
+    public static final double BG_HEIGHT_AT_SCALE1 = TEXT_SCALE * (9 + 1);
+    public static final double BG_CENTER_X_AT_SCALE1 = TEXT_SCALE * 0.5;
+    public static final double BG_CENTER_Y_AT_SCALE1 = BG_HEIGHT_AT_SCALE1 / 2.0;
+
     private DisplayEntities() {
     }
 
@@ -65,6 +80,34 @@ public final class DisplayEntities {
             out.putBoolean("see_through", def.seeThrough);
             out.putBoolean("default_background", def.defaultBackground);
             out.store("alignment", Display.TextDisplay.Align.CODEC, alignOf(def.textAlign));
+        });
+    }
+
+    /**
+     * Configures a text display as a solid translucent rectangle: a single (invisible) space whose
+     * background quad is stretched by the transform to fill the frame, coloured by {@code argb}.
+     * {@code cullSize} enlarges the culling box so the stretched quad is not culled when the anchor
+     * block leaves the screen.
+     */
+    public static void applyBackgroundRect(Display.TextDisplay entity, int argb, double cullSize,
+                                           ElementTransform transform, int interpolationTicks) {
+        Transformation transformation = transform.toTransformation();
+        EntityNbt.edit(entity, out -> {
+            out.store(Display.TAG_TRANSFORMATION, Transformation.EXTENDED_CODEC, transformation);
+            out.putInt(Display.TAG_TRANSFORMATION_INTERPOLATION_DURATION, interpolationTicks);
+            out.putInt(Display.TAG_TRANSFORMATION_START_INTERPOLATION, 0);
+
+            out.store(Display.TextDisplay.TAG_TEXT, ComponentSerialization.CODEC, Component.literal(" "));
+            out.putInt("line_width", 1000);
+            out.putInt("background", argb);
+            out.putByte("text_opacity", (byte) 0);
+            out.putBoolean("shadow", false);
+            out.putBoolean("see_through", false);
+            out.putBoolean("default_background", false);
+            out.store("alignment", Display.TextDisplay.Align.CODEC, Display.TextDisplay.Align.CENTER);
+
+            out.putFloat(Display.TAG_WIDTH, (float) cullSize);
+            out.putFloat(Display.TAG_HEIGHT, (float) cullSize);
         });
     }
 

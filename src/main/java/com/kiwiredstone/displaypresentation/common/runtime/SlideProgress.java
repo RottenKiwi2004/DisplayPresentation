@@ -125,7 +125,8 @@ public final class SlideProgress {
         stepIndex = 0;
         ticksSinceStep = 0;
         SlideDefinition slideDef = show.slides.get(index);
-        currentSlide = new BaseSlide(level, showName, frameForSlide(slideDef), slideDef);
+        currentSlide = new BaseSlide(level, showName, frameForSlide(slideDef), slideDef,
+                show.backgroundFor(slideDef));
         for (BaseElement element : currentSlide.elements()) {
             element.spawn();
             live.put(element.id(), element);
@@ -180,7 +181,8 @@ public final class SlideProgress {
      */
     private void transitionToNextSlide() {
         SlideDefinition nextDef = show.slides.get(slideIndex + 1);
-        BaseSlide next = new BaseSlide(level, showName, frameForSlide(nextDef), nextDef);
+        BaseSlide next = new BaseSlide(level, showName, frameForSlide(nextDef), nextDef,
+                show.backgroundFor(nextDef));
 
         Map<String, BaseElement> nextLive = new LinkedHashMap<>();
         for (BaseElement nextElement : next.elements()) {

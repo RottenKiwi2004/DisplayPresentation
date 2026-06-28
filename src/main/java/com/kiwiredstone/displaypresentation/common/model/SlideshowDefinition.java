@@ -14,9 +14,17 @@ import java.util.List;
 public final class SlideshowDefinition {
     public String name;
     public Aspect aspect = new Aspect();
+
+    /** Default background applied to every slide that does not override it (translucent black @ 0.25). */
+    public SlideBackground background = new SlideBackground();
+
     public List<SlideDefinition> slides = new ArrayList<>();
 
     public Aspect aspectFor(SlideDefinition slide) {
         return slide.aspect != null ? slide.aspect : aspect;
+    }
+
+    public SlideBackground backgroundFor(SlideDefinition slide) {
+        return slide.background != null ? slide.background : background;
     }
 }

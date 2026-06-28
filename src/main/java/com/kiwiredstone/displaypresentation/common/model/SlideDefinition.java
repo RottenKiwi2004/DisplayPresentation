@@ -18,6 +18,9 @@ public final class SlideDefinition {
     /** Optional aspect-ratio override; {@code null} means inherit the slideshow default. */
     public Aspect aspect;
 
+    /** Optional background override; {@code null} means inherit the slideshow default background. */
+    public SlideBackground background;
+
     public List<ElementDefinition> elements = new ArrayList<>();
 
     /** Number of animation steps after the initial layout. 0 = infer from animations. */

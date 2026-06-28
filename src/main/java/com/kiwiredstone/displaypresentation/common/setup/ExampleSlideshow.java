@@ -5,6 +5,7 @@ import com.kiwiredstone.displaypresentation.common.geometry.Alignment;
 import com.kiwiredstone.displaypresentation.common.model.AnimationDefinition;
 import com.kiwiredstone.displaypresentation.common.model.Aspect;
 import com.kiwiredstone.displaypresentation.common.model.GroupElementDefinition;
+import com.kiwiredstone.displaypresentation.common.model.SlideBackground;
 import com.kiwiredstone.displaypresentation.common.model.SlideDefinition;
 import com.kiwiredstone.displaypresentation.common.model.SlideshowDefinition;
 import com.kiwiredstone.displaypresentation.common.model.TextElementDefinition;
@@ -64,6 +65,8 @@ public final class ExampleSlideshow {
         // --- Slide 2 ---
         SlideDefinition slide2 = new SlideDefinition();
         slide2.id = "details";
+        // Override the default translucent-black background with a more opaque dark blue.
+        slide2.background = new SlideBackground("#101830", 0.6f, true);
 
         // Same id "title" => morphs from slide 1 instead of being respawned.
         TextElementDefinition title2 = text("title", 0.0, 0.6, Alignment.TOP_CENTER, "Slide Two");

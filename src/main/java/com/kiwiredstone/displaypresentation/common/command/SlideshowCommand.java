@@ -8,8 +8,10 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -31,6 +33,14 @@ public final class SlideshowCommand {
     /** Distance in front of the player the slide is placed at by the no-coordinate form. */
     private static final double PLACE_DISTANCE = 3.0;
 
+    /** Tab-completion for {@code place}: every slideshow definition found in {@code /slideshows}. */
+    private static final SuggestionProvider<CommandSourceStack> SUGGEST_DEFINITIONS =
+            (ctx, builder) -> SharedSuggestionProvider.suggest(SlideshowRepository.list(), builder);
+
+    /** Tab-completion for {@code stop}/{@code next}/{@code prev}/{@code goto}: currently running shows. */
+    private static final SuggestionProvider<CommandSourceStack> SUGGEST_ACTIVE =
+            (ctx, builder) -> SharedSuggestionProvider.suggest(PresentationManager.get().activeNames(), builder);
+
     private SlideshowCommand() {
     }
 
@@ -39,6 +49,7 @@ public final class SlideshowCommand {
                 .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .then(Commands.literal("place")
                         .then(Commands.argument("name", StringArgumentType.word())
+                                .suggests(SUGGEST_DEFINITIONS)
                                 .executes(SlideshowCommand::placeFacingPlayer)
                                 .then(Commands.argument("pos", Vec3Argument.vec3())
                                         .then(Commands.argument("yaw", FloatArgumentType.floatArg())
@@ -46,15 +57,19 @@ public final class SlideshowCommand {
                                                         .executes(SlideshowCommand::placeExplicit))))))
                 .then(Commands.literal("stop")
                         .then(Commands.argument("name", StringArgumentType.word())
+                                .suggests(SUGGEST_ACTIVE)
                                 .executes(SlideshowCommand::stop)))
                 .then(Commands.literal("next")
                         .then(Commands.argument("name", StringArgumentType.word())
+                                .suggests(SUGGEST_ACTIVE)
                                 .executes(ctx -> advance(ctx, true))))
                 .then(Commands.literal("prev")
                         .then(Commands.argument("name", StringArgumentType.word())
+                                .suggests(SUGGEST_ACTIVE)
                                 .executes(ctx -> advance(ctx, false))))
                 .then(Commands.literal("goto")
                         .then(Commands.argument("name", StringArgumentType.word())
+                                .suggests(SUGGEST_ACTIVE)
                                 .then(Commands.argument("index", IntegerArgumentType.integer(0))
                                         .executes(SlideshowCommand::gotoSlide))))
                 .then(Commands.literal("list")

@@ -3,6 +3,7 @@ package com.kiwiredstone.displaypresentation.common.runtime;
 import com.kiwiredstone.displaypresentation.common.geometry.SlideFrame;
 import com.kiwiredstone.displaypresentation.common.model.ElementDefinition;
 import com.kiwiredstone.displaypresentation.common.model.GroupElementDefinition;
+import com.kiwiredstone.displaypresentation.common.model.SlideBackground;
 import com.kiwiredstone.displaypresentation.common.model.SlideDefinition;
 import com.kiwiredstone.displaypresentation.common.model.TextElementDefinition;
 import net.minecraft.server.level.ServerLevel;
@@ -33,11 +34,19 @@ public final class BaseSlide {
     private final Map<String, BaseElement> elementsById = new LinkedHashMap<>();
     private int depthCounter;
 
-    public BaseSlide(ServerLevel level, String showName, SlideFrame frame, SlideDefinition def) {
+    public BaseSlide(ServerLevel level, String showName, SlideFrame frame, SlideDefinition def,
+                     SlideBackground background) {
         this.level = level;
         this.showName = showName;
         this.frame = frame;
         this.def = def;
+        // The background is the first (back-most) element so it morphs/cleans up like any other.
+        if (background != null && background.enabled) {
+            BackgroundElement bg = new BackgroundElement(
+                    level, showName, new BackgroundElementDefinition(background.toArgb()), frame);
+            elements.add(bg);
+            elementsById.put(bg.id(), bg);
+        }
         build(def.elements, ParentTransform.IDENTITY, "");
     }
 
